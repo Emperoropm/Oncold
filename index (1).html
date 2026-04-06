@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ONCOLD — Fashion Streetwear</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --red: #cc0000;
+      --red-bright: #e8000d;
+      --white: #ffffff;
+      --black: #0a0a0a;
+      --grid: rgba(255,255,255,0.07);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--black); color: #fff; font-family: 'Barlow', sans-serif; cursor: none; overflow-x: hidden; }
+
+    /* Cursor */
+    .cur { width: 10px; height: 10px; background: #fff; border-radius: 50%; position: fixed; pointer-events: none; z-index: 9999; transform: translate(-50%,-50%); transition: background 0.2s, transform 0.15s; }
+    .cur-ring { width: 34px; height: 34px; border: 1px solid rgba(255,255,255,0.45); border-radius: 50%; position: fixed; pointer-events: none; z-index: 9998; transform: translate(-50%,-50%); }
+
+    /* Grid bg */
+    .gbg { background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size: 60px 60px; }
+
+    /* Diagonal stripes */
+    .stripes { background: repeating-linear-gradient(-45deg, #fff 0, #fff 10px, #000 10px, #000 20px); }
+
+    /* Nav */
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 20px 48px; background: rgba(10,10,10,0.9); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .logo { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 3px; color: #fff; text-decoration: none; }
+    .logo-skull { color: var(--red); }
+    nav ul { display: flex; gap: 48px; list-style: none; }
+    nav ul a { font-family: 'Barlow Condensed', sans-serif; font-size: 0.95rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.55); text-decoration: none; transition: color 0.2s; position: relative; padding-bottom: 4px; }
+    nav ul a::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 2px; background: var(--red); transition: width 0.3s; }
+    nav ul a:hover, nav ul a.active { color: #fff; }
+    nav ul a:hover::after, nav ul a.active::after { width: 100%; }
+    .ham { display: flex; flex-direction: column; gap: 5px; cursor: pointer; }
+    .ham span { display: block; width: 24px; height: 2px; background: #fff; }
+
+    /* Search */
+    .sbar { position: fixed; bottom: 28px; left: 44px; z-index: 100; display: flex; align-items: center; background: #fff; border-radius: 50px; padding: 8px 10px 8px 22px; gap: 10px; width: 240px; box-shadow: 0 4px 24px rgba(0,0,0,0.4); }
+    .sbar input { background: transparent; border: none; outline: none; font-family: 'Barlow', sans-serif; font-size: 0.88rem; color: #111; flex: 1; }
+    .sbar input::placeholder { color: #999; }
+    .sbar button { background: #0a0a0a; border: none; cursor: pointer; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0; transition: background 0.2s; }
+    .sbar button:hover { background: var(--red); }
+
+    /* Reveal animations */
+    .rv { opacity: 0; transform: translateY(36px); transition: opacity 0.85s ease, transform 0.85s ease; }
+    .rl { opacity: 0; transform: translateX(-44px); transition: opacity 0.85s ease, transform 0.85s ease; }
+    .rr { opacity: 0; transform: translateX(44px); transition: opacity 0.85s ease, transform 0.85s ease; }
+    .rv.vis, .rl.vis, .rr.vis { opacity: 1; transform: none; }
+
+    /* Ticker */
+    .ticker-wrap { overflow: hidden; white-space: nowrap; background: var(--red); padding: 10px 0; }
+    .ticker-inner { display: inline-block; animation: tick 20s linear infinite; font-family: 'Bebas Neue', sans-serif; font-size: 0.95rem; letter-spacing: 6px; color: #fff; }
+    @keyframes tick { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    /* Section titles */
+    .st { font-family: 'Bebas Neue', sans-serif; letter-spacing: 3px; line-height: 0.9; }
+
+    /* Timeline */
+    .tl-item { padding-left: 24px; position: relative; }
+    .tl-item::before { content: ''; position: absolute; left: 0; top: 8px; width: 3px; height: calc(100% - 8px); background: var(--red); border-radius: 2px; }
+    .tl-year { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 3px; color: #fff; }
+    .tl-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.88rem; letter-spacing: 2px; text-transform: uppercase; color: var(--red); margin: 4px 0 8px; font-weight: 700; }
+    .tl-desc { font-size: 0.94rem; line-height: 1.72; color: rgba(255,255,255,0.65); }
+
+    /* Brand grid cells */
+    .bcell { display: flex; align-items: center; justify-content: center; flex-direction: column; border: 1px solid rgba(255,255,255,0.06); position: relative; overflow: hidden; cursor: pointer; transition: background 0.3s; min-height: 200px; }
+    .bcell:hover { background: rgba(255,255,255,0.04); }
+    .bcell .bl { font-family: 'Bebas Neue', sans-serif; font-size: 2.4rem; letter-spacing: 3px; transition: transform 0.3s; }
+    .bcell:hover .bl { transform: scale(1.08); }
+
+    /* Stat box */
+    .stat-box { text-align: center; }
+    .stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; color: var(--red); line-height: 1; }
+    .stat-lbl { font-family: 'Barlow Condensed', sans-serif; font-size: 0.7rem; letter-spacing: 3px; color: rgba(255,255,255,0.35); text-transform: uppercase; margin-top: 4px; }
+
+    /* Contact items */
+    .ci label { font-family: 'Bebas Neue', sans-serif; font-size: 1.25rem; letter-spacing: 3px; display: block; margin-bottom: 6px; }
+    .ci p, .ci a { font-size: 0.95rem; line-height: 1.65; color: rgba(255,255,255,0.58); text-decoration: none; transition: color 0.2s; }
+    .ci a:hover { color: var(--red); }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      nav { padding: 16px 20px; }
+      nav ul { gap: 18px; }
+      .two-col { grid-template-columns: 1fr !important; }
+      .hero-img-side { display: none !important; }
+      .sbar { left: 16px; }
+      section { padding-left: 20px !important; padding-right: 20px !important; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="cur" id="cur"></div>
+<div class="cur-ring" id="curRing"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#home" class="logo">ONC<span class="logo-skull">☠</span>LD</a>
+  <ul>
+    <li><a href="#home" class="active" id="nav-home">Home</a></li>
+    <li><a href="#about" id="nav-about">About</a></li>
+    <li><a href="#products" id="nav-cat">Catalogue</a></li>
+  </ul>
+  <div class="ham"><span></span><span></span></div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section id="home" style="min-height:100vh;position:relative;display:flex;align-items:center;overflow:hidden;background:#000">
+  <!-- Left grid -->
+  <div class="gbg" style="position:absolute;left:0;top:0;bottom:0;width:58%;z-index:0"></div>
+  <!-- Gradient fade to right -->
+  <div style="position:absolute;left:50%;top:0;bottom:0;width:180px;background:linear-gradient(to right,#000,transparent);z-index:1"></div>
+
+  <!-- Content -->
+  <div style="position:relative;z-index:2;padding:0 48px;padding-top:100px;max-width:58%">
+    <h1 class="st rv" style="font-size:clamp(76px,11vw,156px);color:#fff">FASHION<br>STREETWEAR</h1>
+    <p class="rv" style="transition-delay:.2s;font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;letter-spacing:6px;color:rgba(255,255,255,0.52);margin-top:24px">
+      WAKE &nbsp;<span style="color:rgba(255,255,255,0.22)">||</span>&nbsp; HUSTLE &nbsp;<span style="color:rgba(255,255,255,0.22)">||</span>&nbsp; SLAY
+    </p>
+  </div>
+
+  <!-- Right side photo area -->
+  <div class="hero-img-side" style="position:absolute;right:0;top:0;bottom:0;width:44%;background:linear-gradient(135deg,#141414 0%,#000 100%);display:flex;align-items:center;justify-content:center;overflow:hidden">
+    <!-- Placeholder — replace with <img src="your-hero.jpg" ...> -->
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:7rem;letter-spacing:4px;color:rgba(255,255,255,0.04);text-align:center;line-height:1;user-select:none">ONC<br>OLD</div>
+    <div style="position:absolute;left:0;top:0;bottom:0;width:100px;background:linear-gradient(to right,#000,transparent)"></div>
+  </div>
+</section>
+
+<!-- Ticker -->
+<div class="ticker-wrap">
+  <div class="ticker-inner">
+    WAKE &nbsp;||&nbsp; HUSTLE &nbsp;||&nbsp; SLAY &nbsp;||&nbsp; ONCOLD STREETWEAR &nbsp;||&nbsp; FOUNDED IN NEPAL &nbsp;||&nbsp; STREET TESTED IN TORONTO &nbsp;||&nbsp; WAKE &nbsp;||&nbsp; HUSTLE &nbsp;||&nbsp; SLAY &nbsp;||&nbsp; ONCOLD STREETWEAR &nbsp;||&nbsp; FOUNDED IN NEPAL &nbsp;||&nbsp; STREET TESTED IN TORONTO &nbsp;||&nbsp;
+  </div>
+</div>
+
+<!-- ===== ABOUT ===== -->
+<section id="about" style="min-height:100vh;display:grid;grid-template-columns:1fr 1fr" class="two-col">
+  <!-- Left -->
+  <div style="position:relative;background:#0d0d0d;min-height:100vh;overflow:hidden">
+    <div class="gbg" style="position:absolute;inset:0;z-index:0"></div>
+    <div style="position:relative;z-index:1;padding:80px 40px;height:100%;display:flex;flex-direction:column;gap:20px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:4px;color:#fff;line-height:1.3">WHO ARE<br>WE?</div>
+      <!-- Main photo placeholder -->
+      <div style="flex:1;min-height:280px;background:linear-gradient(150deg,#1c1c1c,#060606);border:1px solid rgba(255,255,255,0.07);display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:2.5rem;color:rgba(255,255,255,0.05);letter-spacing:4px">ONCOLD</div>
+        <div style="position:absolute;bottom:12px;left:12px;font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;letter-spacing:2px;color:rgba(255,255,255,0.18)">↑ Add your brand photo here</div>
+      </div>
+      <div style="font-size:3.2rem;text-align:center">🌐</div>
+      <div class="stripes" style="height:24px;width:180px"></div>
+    </div>
+  </div>
+
+  <!-- Right -->
+  <div style="padding:80px 60px;position:relative;display:flex;flex-direction:column;justify-content:center">
+    <div class="gbg" style="position:absolute;inset:0;z-index:0"></div>
+    <div style="position:relative;z-index:1">
+      <h2 class="st rv" style="font-size:clamp(56px,7vw,96px)">ABOUT<br>US</h2>
+      <div class="rv" style="transition-delay:.18s;margin-top:28px;font-size:1rem;line-height:1.82;color:rgba(255,255,255,0.78)">
+        <p>ONCOLD is more than streetwear. It's a mindset.</p><br>
+        <p>Founded in 2022, ONCOLD was built for the ones who don't wait, don't settle, and don't follow. It represents a generation driven by hunger, discipline, and vision. Our philosophy is simple: Wake. Hustle. Slay.</p><br>
+        <p>Built for those who don't follow standards.</p>
+        <p>They create them.</p>
+      </div>
+      <div class="rv" style="transition-delay:.34s;display:flex;gap:32px;margin-top:44px;align-items:center">
+        <div class="stat-box"><div class="stat-num">2022</div><div class="stat-lbl">Founded</div></div>
+        <div style="width:1px;height:48px;background:rgba(255,255,255,0.1)"></div>
+        <div class="stat-box"><div class="stat-num">2</div><div class="stat-lbl">Countries</div></div>
+        <div style="width:1px;height:48px;background:rgba(255,255,255,0.1)"></div>
+        <div class="stat-box"><div class="stat-num">∞</div><div class="stat-lbl">Mindset</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== HISTORY ===== -->
+<section id="history" class="gbg" style="min-height:100vh;padding:100px 48px 80px;position:relative">
+  <div class="rl"><h2 class="st" style="font-size:clamp(56px,8vw,110px)">OUR<br>HISTORY</h2></div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:60px;align-items:start" class="two-col">
+    <div style="display:flex;flex-direction:column;gap:40px">
+      <div class="tl-item rv" style="transition-delay:.1s">
+        <div class="tl-year">2022</div>
+        <div class="tl-label">Founded</div>
+        <p class="tl-desc">ONCOLD was established in Nepal with a group of friends driven by a hustler mindset. What started as an idea turned into a movement built on ambition, discipline, and the drive to create something bigger.</p>
+      </div>
+      <div class="tl-item rv" style="transition-delay:.2s">
+        <div class="tl-year">2024–25</div>
+        <div class="tl-label">Building Identity</div>
+        <p class="tl-desc">Developed signature designs like Real Eyes and Medusa, shaping the brand's bold and meaningful aesthetic.</p>
+      </div>
+      <div class="tl-item rv" style="transition-delay:.3s">
+        <div class="tl-year">2026</div>
+        <div class="tl-label">Expansion to Toronto</div>
+        <p class="tl-desc">ONCOLD steps into the global scene, growing its presence in Toronto, Canada.</p>
+      </div>
+    </div>
+
+    <!-- Photo placeholder -->
+    <div class="rr">
+      <div style="width:100%;aspect-ratio:4/3;background:linear-gradient(135deg,#1a1a1a,#050505);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:rgba(255,255,255,0.05);letter-spacing:4px">GROUP PHOTO</div>
+        <div style="position:absolute;bottom:12px;left:12px;font-size:0.7rem;letter-spacing:2px;color:rgba(255,255,255,0.18);font-family:'Barlow Condensed',sans-serif">↑ Add your group photo</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stripes" style="position:absolute;right:0;bottom:0;width:180px;height:24px"></div>
+</section>
+
+<!-- ===== VISION & MISSION ===== -->
+<section id="vision" style="min-height:100vh;display:grid;grid-template-columns:340px 1fr;align-items:stretch;overflow:hidden" class="two-col">
+  <!-- Left panel -->
+  <div style="position:relative;background:#0c0c0c;overflow:hidden">
+    <div class="gbg" style="position:absolute;inset:0;z-index:0"></div>
+    <div style="position:relative;z-index:1;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;gap:16px">
+      <div style="flex:1;width:85%;background:linear-gradient(160deg,#1c1c1c,#050505);border:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;min-height:260px">
+        <span style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:rgba(255,255,255,0.05)">PHOTO</span>
+      </div>
+      <div style="font-size:2.4rem">🌐</div>
+      <div class="stripes" style="height:20px;width:160px"></div>
+    </div>
+    <div style="position:absolute;left:10px;top:50%;transform:translateY(-50%) rotate(-90deg);font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:8px;color:rgba(255,255,255,0.4);white-space:nowrap;z-index:2">ONCOLD</div>
+  </div>
+
+  <!-- Right panel -->
+  <div style="padding:80px 60px;position:relative" class="gbg">
+    <h2 class="st rv" style="font-size:clamp(46px,6vw,84px)">VISION &amp;<br>MISSION</h2>
+    <p class="rv" style="transition-delay:.15s;margin-top:20px;font-size:0.98rem;line-height:1.75;color:rgba(255,255,255,0.6);max-width:520px">
+      Represent hustlers through authentic streetwear that turns mindset into identity.
+    </p>
+    <div class="rv" style="transition-delay:.28s;display:grid;grid-template-columns:1fr 1fr;gap:44px;margin-top:44px">
+      <div>
+        <h3 style="font-family:'Bebas Neue',sans-serif;font-size:1.9rem;letter-spacing:3px;margin-bottom:14px;border-bottom:2px solid var(--red);padding-bottom:8px">VISION</h3>
+        <p style="font-size:0.94rem;line-height:1.8;color:rgba(255,255,255,0.62);text-align:justify">To build a global streetwear culture where individuality leads, trends are created—not followed—and every piece represents a mindset of ambition, rebellion, and self-belief.</p>
+      </div>
+      <div>
+        <h3 style="font-family:'Bebas Neue',sans-serif;font-size:1.9rem;letter-spacing:3px;margin-bottom:14px;border-bottom:2px solid var(--red);padding-bottom:8px">MISSION</h3>
+        <p style="font-size:0.94rem;line-height:1.8;color:rgba(255,255,255,0.62);text-align:justify">To empower hustlers and creators by designing authentic streetwear that reflects originality, challenges conformity, and turns everyday expression into a statement of purpose.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PRODUCTS ===== -->
+<section id="products" style="min-height:100vh;padding:100px 48px;position:relative;background:#060606">
+  <div class="gbg" style="position:absolute;inset:0;z-index:0"></div>
+  <div style="position:relative;z-index:1">
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start" class="two-col">
+      <!-- Left: imgs -->
+      <div class="rl">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div style="aspect-ratio:1;background:linear-gradient(135deg,#1a1a1a,#050505);border:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center">
+            <span style="font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;letter-spacing:2px;color:rgba(255,255,255,0.2)">PRODUCT 1</span>
+          </div>
+          <div style="aspect-ratio:1;background:linear-gradient(135deg,#0f0f0f,#000);border:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center">
+            <span style="font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;letter-spacing:2px;color:rgba(255,255,255,0.2)">REAL EYES</span>
+          </div>
+        </div>
+        <div class="stripes" style="height:24px;width:180px;margin-top:14px"></div>
+      </div>
+
+      <!-- Right: info -->
+      <div class="rr">
+        <h2 class="st" style="font-size:clamp(56px,8vw,108px)">OUR<br>PRODUCT</h2>
+        <div style="margin-top:40px">
+          <h4 style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:3px;border-bottom:2px solid var(--red);padding-bottom:6px;margin-bottom:10px">PRODUCT 1</h4>
+          <p style="font-family:'Barlow Condensed',sans-serif;font-size:0.88rem;letter-spacing:2px;color:var(--red);margin-bottom:8px">FIRST DROP — REAL EYES</p>
+          <p style="font-size:0.94rem;line-height:1.72;color:rgba(255,255,255,0.65)">A quote. A mindset. A statement.<br>Seeing beyond illusions — Real Eyes Realize Real Lies.</p>
+        </div>
+        <div style="margin-top:32px">
+          <h4 style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:3px;border-bottom:2px solid var(--red);padding-bottom:6px;margin-bottom:10px">PRODUCT 2</h4>
+          <p style="font-size:0.94rem;line-height:1.72;color:rgba(255,255,255,0.65)">It represents those who see further, move with precision, and stay above the noise. While others follow patterns, the eagle creates its own path—calm, focused, and untouchable.<br><br>This piece is for the ones who don't wait for direction. The ones who trust their vision.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product 1 detail row -->
+    <div style="margin-top:80px;display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid rgba(255,255,255,0.08)" class="two-col">
+      <!-- Left: circle + card -->
+      <div style="padding:40px 0;display:flex;flex-direction:column;gap:24px">
+        <div class="rl">
+          <div style="width:240px;height:240px;border-radius:50%;background:linear-gradient(135deg,#1c1c1c,#000);border:3px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center">
+            <span style="font-size:0.75rem;letter-spacing:2px;color:rgba(255,255,255,0.15);font-family:'Barlow Condensed',sans-serif">SKATER PHOTO</span>
+          </div>
+        </div>
+        <div class="rl" style="transition-delay:.14s">
+          <div style="width:100%;max-width:360px;aspect-ratio:4/3;background:linear-gradient(135deg,#111,#040404);border:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center">
+            <span style="font-size:0.75rem;letter-spacing:2px;color:rgba(255,255,255,0.15);font-family:'Barlow Condensed',sans-serif">PRODUCT PHOTO</span>
+          </div>
+          <div class="stripes" style="height:20px;width:160px;margin-top:10px"></div>
+        </div>
+      </div>
+
+      <!-- Right -->
+      <div class="rr" style="padding:60px 44px;position:relative">
+        <!-- Globe SVG -->
+        <svg width="68" height="68" viewBox="0 0 68 68" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:18px;opacity:0.75">
+          <circle cx="34" cy="34" r="32" stroke="white" stroke-width="1.5"/>
+          <ellipse cx="34" cy="34" rx="14" ry="32" stroke="white" stroke-width="1.5"/>
+          <line x1="2" y1="34" x2="66" y2="34" stroke="white" stroke-width="1.5"/>
+          <path d="M6 20 Q34 26 62 20" stroke="white" stroke-width="1.2" fill="none"/>
+          <path d="M6 48 Q34 42 62 48" stroke="white" stroke-width="1.2" fill="none"/>
+        </svg>
+        <h2 class="st" style="font-size:clamp(48px,6vw,86px)">PRODUCT 1</h2>
+        <p style="font-size:0.96rem;line-height:1.8;color:rgba(255,255,255,0.62);margin-top:22px;max-width:400px">
+          Our first release introduced more than a design — it introduced a mindset. "Real Eyes Realize Real Lies" reflects awareness, truth, and the ability to see beyond the surface.
+        </p>
+        <div style="margin-top:44px;font-family:'Bebas Neue',sans-serif;font-size:3.2rem;letter-spacing:4px;color:var(--red);text-shadow:0 0 28px rgba(204,0,0,0.45)">ONCOLD☠</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== BRAND IMG ===== -->
+<section id="brand" style="min-height:90vh;padding:80px 48px;position:relative;background:#050505">
+  <div class="gbg" style="position:absolute;inset:0;z-index:0"></div>
+  <div style="position:relative;z-index:1">
+    <h2 class="st rv" style="font-size:clamp(48px,6vw,80px)">BRAND IMG</h2>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);border:1px solid rgba(255,255,255,0.07);margin-top:44px" class="rv" style="transition-delay:.15s">
+      <div class="bcell"><div class="bl" style="color:#fff;font-size:1.9rem">ONC<span style="color:#f8a020">🏮</span>LD</div><div style="font-family:'Barlow Condensed',sans-serif;font-size:0.65rem;letter-spacing:3px;color:rgba(255,255,255,0.28);position:absolute;bottom:14px">vol 2.0</div></div>
+      <div class="bcell"><div class="bl" style="background:linear-gradient(90deg,#cc0000,#880000);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:2.2rem">ONC☠LD</div></div>
+      <div class="bcell"><div class="bl" style="background:linear-gradient(180deg,#ff2020,#660000);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:2rem;letter-spacing:2px">ONCOLD</div></div>
+      <div class="bcell"><div class="bl" style="color:#ff6500;font-size:2.4rem">ONC☠LD</div></div>
+      <div class="bcell" style="background:rgba(255,255,255,0.02)"><div style="font-size:4.5rem;color:#fff;font-weight:900;line-height:1">↗</div></div>
+      <div class="bcell"><div class="bl" style="color:#fff;font-size:2.5rem">ONC☠LD</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== BUSINESS CARD ===== -->
+<section id="bizcard" style="min-height:70vh;padding:80px 48px;position:relative;background:#0a0a0a">
+  <div class="gbg" style="position:absolute;inset:0;z-index:0"></div>
+  <div style="position:relative;z-index:1">
+    <h2 class="st rv" style="font-size:clamp(48px,7vw,100px)">BUSINESS<br>CARD</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:44px" class="rv two-col">
+      <!-- Card front -->
+      <div style="aspect-ratio:3/2;background:linear-gradient(150deg,#181818,#0a0a0a);border:1px solid rgba(255,255,255,0.1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:2.8rem;letter-spacing:6px;color:#fff">ONC☠LD</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.82rem;letter-spacing:4px;color:rgba(255,255,255,0.35)">WAKE | HUSTLE | SLAY</div>
+      </div>
+      <!-- Card back -->
+      <div style="aspect-ratio:3/2;background:linear-gradient(150deg,#141414,#080808);border:1px solid rgba(255,255,255,0.1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:28px">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.88rem;letter-spacing:2px;color:rgba(255,255,255,0.45)">You Got It, Not Everyone Does</div>
+        <div style="width:55%;height:1px;background:rgba(255,255,255,0.08)"></div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.9rem;letter-spacing:4px;color:#fff">ONC☠LD</div>
+        <div style="width:55%;height:1px;background:rgba(255,255,255,0.08)"></div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:0.72rem;letter-spacing:2px;color:rgba(255,255,255,0.3)">Crafted In Nepal | Street Tested In Toronto</div>
+      </div>
+    </div>
+    <div style="text-align:right;font-size:4rem;color:#fff;font-weight:900;margin-top:8px;opacity:0.7">↗</div>
+  </div>
+</section>
+
+<!-- ===== CONTACT ===== -->
+<section id="contact" style="min-height:100vh;display:grid;grid-template-columns:1fr 1fr;align-items:stretch;overflow:hidden" class="two-col">
+  <!-- Left: image w/ barcode -->
+  <div style="position:relative;background:#080808;min-height:100vh;display:flex;align-items:center;overflow:hidden">
+    <!-- Barcode-style left stripe -->
+    <div style="position:absolute;left:0;top:0;bottom:0;width:44px;background:#fff;display:flex;flex-direction:column;justify-content:center;padding:0 7px;gap:5px">
+      <div style="height:4px;background:#000"></div><div style="height:7px;background:#000"></div><div style="height:2px;background:#000"></div>
+      <div style="height:5px;background:#000"></div><div style="height:9px;background:#000"></div><div style="height:2px;background:#000"></div>
+      <div style="height:4px;background:#000"></div><div style="height:3px;background:#000"></div><div style="height:8px;background:#000"></div>
+      <div style="height:2px;background:#000"></div><div style="height:5px;background:#000"></div><div style="height:6px;background:#000"></div>
+      <div style="height:3px;background:#000"></div><div style="height:5px;background:#000"></div><div style="height:2px;background:#000"></div>
+      <div style="height:9px;background:#000"></div><div style="height:3px;background:#000"></div><div style="height:4px;background:#000"></div>
+      <div style="height:2px;background:#000"></div><div style="height:6px;background:#000"></div><div style="height:3px;background:#000"></div>
+    </div>
+    <div style="margin-left:44px;flex:1;height:100%;background:linear-gradient(160deg,#161616,#040404);display:flex;align-items:center;justify-content:center">
+      <span style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:rgba(255,255,255,0.05);letter-spacing:4px">ADD LIFESTYLE PHOTO</span>
+    </div>
+  </div>
+
+  <!-- Right: info -->
+  <div style="padding:80px 60px;position:relative;display:flex;flex-direction:column;justify-content:center" class="gbg">
+    <h2 class="st rv" style="font-size:clamp(52px,7vw,100px)">CONTACT<br>US</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:44px;margin-top:56px" class="rv two-col">
+      <div class="ci"><label>Email</label><a href="mailto:hi.oncold@gmail.com">hi.oncold@gmail.com</a></div>
+      <div class="ci"><label>Website</label><p>on going</p></div>
+      <div class="ci"><label>Social Media</label><p>@oncold_Nepal<br>@oncold_Toronto</p></div>
+      <div class="ci"><label>Phone Number</label><a href="tel:9779749339043">977-9749339043</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== THANK YOU ===== -->
+<section id="thankyou" style="min-height:100vh;display:grid;grid-template-columns:96px 1fr;align-items:stretch;background:#000">
+  <!-- Sidebar -->
+  <div style="display:flex;align-items:center;justify-content:center;border-right:1px solid rgba(255,255,255,0.05)">
+    <span style="font-family:'Bebas Neue',sans-serif;font-size:0.9rem;letter-spacing:6px;color:rgba(255,255,255,0.25);writing-mode:vertical-rl;transform:rotate(180deg)">LICERIA &amp; CO.</span>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;align-items:center;padding:60px;gap:36px" class="gbg two-col">
+    <!-- Left: image area -->
+    <div class="rl">
+      <div class="stripes" style="height:20px;width:160px;margin-bottom:14px"></div>
+      <div style="position:relative;aspect-ratio:3/4;background:linear-gradient(160deg,#1a1a1a,#050505);border:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;overflow:hidden">
+        <span style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:rgba(255,255,255,0.05)">PHOTO</span>
+        <div style="position:absolute;top:16px;left:16px;font-family:'Barlow Condensed',sans-serif;font-size:0.8rem;color:rgba(255,255,255,0.25)">247</div>
+        <div style="position:absolute;top:16px;right:16px;font-family:'Barlow Condensed',sans-serif;font-size:0.7rem;letter-spacing:2px;color:rgba(255,255,255,0.2)">ON A MISSION.</div>
+        <div style="position:absolute;bottom:14px;left:0;right:0;text-align:center;font-family:'Bebas Neue',sans-serif;font-size:0.9rem;letter-spacing:4px;color:rgba(255,255,255,0.2)">ONCOLD</div>
+      </div>
+    </div>
+
+    <!-- Right: text -->
+    <div class="rr" style="padding-left:20px">
+      <h2 class="st" style="font-size:clamp(76px,10vw,136px);color:#fff">THANK<br>YOU</h2>
+      <p style="font-family:'Barlow Condensed',sans-serif;font-size:0.95rem;letter-spacing:4px;color:rgba(255,255,255,0.28);margin-top:20px;text-transform:uppercase">Wake. Hustle. Slay.</p>
+      <div style="margin-top:40px;display:flex;gap:16px;flex-wrap:wrap">
+        <a href="#home" style="font-family:'Barlow Condensed',sans-serif;font-size:0.82rem;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.35);text-decoration:none;transition:color 0.2s;border:1px solid rgba(255,255,255,0.1);padding:10px 20px" onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,255,255,0.3)'" onmouseout="this.style.color='rgba(255,255,255,0.35)';this.style.borderColor='rgba(255,255,255,0.1)'">↑ Back to Top</a>
+        <a href="#contact" style="font-family:'Barlow Condensed',sans-serif;font-size:0.82rem;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.35);text-decoration:none;transition:color 0.2s;border:1px solid rgba(255,255,255,0.1);padding:10px 20px" onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,255,255,0.3)'" onmouseout="this.style.color='rgba(255,255,255,0.35)';this.style.borderColor='rgba(255,255,255,0.1)'">Contact Us</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<div style="background:#050505;padding:20px 48px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,0.05)">
+  <p style="font-family:'Barlow Condensed',sans-serif;font-size:0.78rem;letter-spacing:2px;color:rgba(255,255,255,0.25);text-transform:uppercase">© 2026 ONCOLD — Crafted in Nepal, Street Tested in Toronto</p>
+  <p style="font-family:'Barlow Condensed',sans-serif;font-size:0.78rem;letter-spacing:2px;color:rgba(255,255,255,0.25);text-transform:uppercase">WAKE | HUSTLE | SLAY</p>
+</div>
+
+<!-- Search Bar -->
+<div class="sbar">
+  <input type="text" id="searchInput" placeholder="Search Product" />
+  <button onclick="doSearch()" aria-label="Search">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+  </button>
+</div>
+
+<script>
+  // Cursor
+  const cur = document.getElementById('cur');
+  const ring = document.getElementById('curRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; cur.style.left = mx+'px'; cur.style.top = my+'px'; });
+  (function animRing() {
+    rx += (mx - rx) * 0.11; ry += (my - ry) * 0.11;
+    ring.style.left = rx+'px'; ring.style.top = ry+'px';
+    requestAnimationFrame(animRing);
+  })();
+
+  document.querySelectorAll('a, button').forEach(el => {
+    el.addEventListener('mouseenter', () => { cur.style.transform = 'translate(-50%,-50%) scale(2.4)'; cur.style.background = 'var(--red)'; });
+    el.addEventListener('mouseleave', () => { cur.style.transform = 'translate(-50%,-50%) scale(1)'; cur.style.background = '#fff'; });
+  });
+
+  // Scroll reveal
+  const els = document.querySelectorAll('.rv,.rl,.rr');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('vis'); } });
+  }, { threshold: 0.1 });
+  els.forEach(el => obs.observe(el));
+
+  // Active nav
+  const secs = document.querySelectorAll('section[id]');
+  window.addEventListener('scroll', () => {
+    let cur = 'home';
+    secs.forEach(s => { if (window.scrollY >= s.offsetTop - 140) cur = s.id; });
+    document.querySelectorAll('nav ul a').forEach(a => {
+      const map = { home:'nav-home', about:'nav-about', history:'nav-about', vision:'nav-about', products:'nav-cat', brand:'nav-cat', bizcard:'nav-cat', contact:'nav-cat', thankyou:'nav-cat' };
+      a.classList.toggle('active', a.id === map[cur]);
+    });
+  });
+
+  // Search
+  function doSearch() {
+    const q = document.getElementById('searchInput').value.trim();
+    if (q) { alert('Searching for: ' + q + '\n\nConnect your product catalogue to make this functional!'); }
+  }
+  document.getElementById('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+</script>
+</body>
+</html>
